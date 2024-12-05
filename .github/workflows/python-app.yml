@@ -1,0 +1,58 @@
+# 워크플로우 이름
+name: Deploy to heroku.
+
+# master 브랜치에 대해 푸시
+on:
+  push:
+    branches: [master]
+
+# 워크플로우 job
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 레포지토리 이름 체크
+      - name: Checkout
+      # GitHub에서 제공하는 공식 액션으로, 워크플로우가 실행될 때 현재 레포지토리의 소스 코드를 가져오는 역할을 합니다.
+      # 기본적으로 GitHub Actions에서 작업을 수행하려면 코드가 필요하기 때문에, 이 단계는 거의 모든 워크플로우의 필수적인 부분입니다.
+      # 이 액션이 실행되면, GitHub Actions 러너(작업을 실행하는 가상 머신)에 해당 브랜치의 파일과 코드가 복사됩니다.
+        uses: actions/checkout@v2
+
+
+### 헤로쿠 디플로이를 위해 필요한 부분 ###
+      - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
+        uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
+        with:
+          # Below you must provide variables for your Heroku app.
+
+          # The email address associated with your Heroku account.
+          # If you don't want to use repository secrets (which is recommended) you can do:
+          # email: my.email@example.com
+          email: ${{ secrets.HEROKU_EMAIL }}
+          
+          # Heroku API key associated with provided user's email.
+          # Api Key is available under your Heroku account settings.
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          
+          # Name of the heroku application to which the build is to be sent.
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+
+          # (Optional, default: "./")
+          # Dockerfile directory.
+          # For example, if you have a Dockerfile in the root of your project, leave it as follows:
+          dockerfile_directory: ./
+
+          # (Optional, default: "Dockerfile")
+          # Dockerfile name.
+          dockerfile_name: Dockerfile
+
+          # (Optional, default: "")
+          # Additional options of docker build command.
+          docker_options: "--no-cache"
+
+          # (Optional, default: "web")
+          # Select the process type for which you want the docker container to be uploaded.
+          # By default, this argument is set to "web".
+          # For more information look at https://devcenter.heroku.com/articles/process-model
+          process_type: web
+### ⬆ IMPORTANT PART ⬆ ###
